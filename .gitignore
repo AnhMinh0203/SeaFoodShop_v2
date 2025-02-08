@@ -46,3 +46,4 @@ Thumbs.db
 
 # Enviroment
 src/environments/*.ts
+".github/workflows/build-check.yml" 
