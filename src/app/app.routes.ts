@@ -6,7 +6,7 @@ import { LoginComponent } from './core/authen/login/login.component';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'login',  // Chuyển hướng về login khi truy cập vào root path
+    redirectTo: 'login',
     pathMatch: 'full'
   },
   {
@@ -93,13 +93,6 @@ export const routes: Routes = [
     loadComponent: () => import('./views/pages/page500/page500.component').then(m => m.Page500Component),
     data: {
       title: 'Page 500'
-    }
-  },
-  {
-    path: 'login',
-    loadComponent: () => import('./views/pages/login/login.component').then(m => m.LoginComponent),
-    data: {
-      title: 'Login Page'
     }
   },
   {
