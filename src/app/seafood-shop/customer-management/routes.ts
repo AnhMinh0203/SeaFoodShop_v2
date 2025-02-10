@@ -5,7 +5,17 @@ export const routes: Routes = [
     loadComponent: () => import('./customer-management.component').then(m => m.CustomerManagementComponent),
     data: {
       title: 'Quản lý khách hàng'
-    }
+    },
+    children: [
+      // Thêm route con ở đây
+      {
+        path: 'add-customer',
+        loadComponent: () => import('./add-customer/add-customer.component').then(m => m.AddCustomerComponent),
+        data: {
+          title: 'Thêm khách hàng'
+        }
+      }
+    ]
   }
 ];
 
