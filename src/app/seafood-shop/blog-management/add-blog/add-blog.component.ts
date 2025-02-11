@@ -10,14 +10,12 @@ import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { EditorModule } from 'primeng/editor';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { ViewEncapsulation } from '@angular/core';
+
 import { SelectModule } from 'primeng/select';
 import { Router } from '@angular/router';
-import { DatePicker } from 'primeng/datepicker';
-
 
 @Component({
-  selector: 'app-add-customer',
+  selector: 'app-add-blog',
   imports: [
     ButtonModule,
     CardModule,
@@ -30,14 +28,14 @@ import { DatePicker } from 'primeng/datepicker';
     FormsModule,
     InputTextModule,
     EditorModule,
-    SelectModule,
-    DatePicker
+    SelectModule
+
 
   ],
-  templateUrl: './add-customer.component.html',
-  styleUrl: './add-customer.component.scss'
+  templateUrl: './add-blog.component.html',
+  styleUrl: './add-blog.component.scss'
 })
-export class AddCustomerComponent {
+export class AddBlogComponent {
   uploadedFiles: any[] = [];
   primaryImg: any;
   imageSrc: string = '';
@@ -48,7 +46,6 @@ export class AddCustomerComponent {
   username:any;
   phone: any;
   address: any;
-
   searchText: string = '';
   rangeDates: any;
   isDropdownOpen = false;
@@ -59,8 +56,32 @@ export class AddCustomerComponent {
     private router: Router
 
   ) {}
+  toolbarOptions = [
+    ['bold', 'italic', 'underline', 'strike'],
+    ['blockquote', 'code-block'],
+    ['link', 'image', 'video'],
+    [{ 'header': 1 }, { 'header': 2 }],
+    [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'check' }],
+    [{ 'indent': '-1' }, { 'indent': '+1' }],
+    [{ 'direction': 'rtl' }],
+    [{ 'size': ['small', false, 'large', 'huge'] }],
+    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+    [{ 'color': [] }, { 'background': [] }],
+    [{ 'font': [] }],
+    [{ 'align': [] }],
+    ['clean']  // remove formatting button
+  ];
 
-  // Phương thức xử lý upload file
+  ngAfterViewInit() {
+    this.quill = new Quill('#editorBlogManagement', {
+      modules: {
+        toolbar: this.toolbarOptions
+      },
+      theme: 'snow',
+      placeholder: 'Nhập nội dung blog...',
+    });
+  }
+
   onUpload(event: any) {
     const file = event.files[0]; // Get the uploaded file
 
@@ -73,7 +94,8 @@ export class AddCustomerComponent {
     reader.readAsDataURL(file); // Convert the file to a data URL for image preview
   }
 
-  navigateToCustomerManagement() {
-    this.router.navigate(['/customer-management']);
+  navigateToBlogManagement() {
+    this.router.navigate(['/blog-management']);
   }
+
 }
