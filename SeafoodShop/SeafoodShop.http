@@ -1,0 +1,6 @@
+@SeafoodShop_HostAddress = http://localhost:5052
+
+GET {{SeafoodShop_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
