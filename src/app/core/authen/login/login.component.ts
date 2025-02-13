@@ -1,47 +1,66 @@
-import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule, NgForm } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
-import { RouterModule ,Router} from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { AuthenService } from '../services/authen.service';
+import { MessageService } from 'primeng/api';
+import { Toast } from 'primeng/toast';
+import { Ripple } from 'primeng/ripple';
 
 @Component({
   selector: 'app-login',
+  standalone: true,  // Standalone component
   imports: [
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
     ButtonModule,
     RouterModule,
+    Toast,
+    Ripple
   ],
+  providers: [MessageService],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  styleUrls: ['./login.component.scss']
 })
-export class LoginComponent {
-  loginForm: FormGroup;
-  test: any;
+export class LoginComponent implements OnInit {
+  loginForm: any;
 
-  constructor(private fb: FormBuilder, private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private _authenService: AuthenService,
+    private messageService: MessageService
+
+  ) { }
+
+  ngOnInit() {
+    // Khởi tạo form khi component được khởi tạo
     this.loginForm = this.fb.group({
-      username: ['', [Validators.required]], // Email hoặc số điện thoại
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      rememberMe: [false], // Checkbox "Nhớ mật khẩu"
+      identifier: ['', [Validators.required]],  // Email hoặc số điện thoại
+      password: ['', [Validators.required]],
     });
   }
 
   onLogin() {
-    alert('Đăng nhập thành công');
-    this.router.navigate(['/dashboard']);
-  }
+    if (this.loginForm.invalid) {
+      return;  // Dừng lại nếu form không hợp lệ
+    }
 
-  onForgotPassword() {
-    console.log('Chuyển hướng đến trang quên mật khẩu');
-  }
+    const model = {
+      identifier: this.loginForm.value.identifier,
+      password: this.loginForm.value.password
+    };
 
-  onRegister() {
-    console.log('Chuyển hướng đến trang đăng ký');
-  }
-
-  loginWith(provider: string) {
-    console.log(`Đăng nhập với ${provider}`);
+    this._authenService.login(model).subscribe((res: any) => {
+      if (res && res.status === 200) {
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Login successfully !' });
+        this.router.navigate(['/dashboard']);
+      }
+      else {
+        this.messageService.add({  severity: 'error', summary: 'Error', detail: res.message });
+      }
+    });
   }
 }

@@ -42,7 +42,6 @@ import { PanelModule } from 'primeng/panel';
     FormsModule,
     SelectModule,
     ButtonModule,
-    DatePicker,
     CommonModule,
     TableModule,
     TagModule,
