@@ -22,8 +22,7 @@ namespace SeafoodShop.Repository
         {
             try
             {
-                return await _context.SeaFoods
-               .ToListAsync();
+                return await _context.SeaFoods.ToListAsync();
             }
             catch (Exception ex)
             {

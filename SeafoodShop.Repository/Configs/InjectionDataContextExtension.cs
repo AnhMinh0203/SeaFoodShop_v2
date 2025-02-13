@@ -12,6 +12,7 @@ namespace SeafoodShop.Repository.Configs
     {
         public static void AddDataContextServices(this IServiceCollection services)
         {
+            services.AddScoped<IAuthenRepository, AuthenRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
         }
     }
