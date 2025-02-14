@@ -14,5 +14,6 @@ namespace SeafoodShop.DataContext.Database
 
         public DbSet<User> Users { get; set; }
         public DbSet<Product> SeaFoods { get; set; }
+        public DbSet<Image> Images { get; set; }
     }
 }

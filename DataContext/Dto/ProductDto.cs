@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace SeafoodShop.DataContext.Models
 {
-    public class Product
+    public class ProductDto
     {
         public int Id { get; set; }
         public string? Name { get; set; }
@@ -17,6 +18,8 @@ namespace SeafoodShop.DataContext.Models
         public int? Quantity { get; set; }
         public string? Instruct { get; set; }
         public string? Origin { get; set; }
+        public IFormFile? PrimaryImg { get; set; }
+        public List<IFormFile> ChildImg { get; set; } = new List<IFormFile>();
         public string? Description { get; set; }
         public DateTime? CreateDate { get; set; }
         public string? CreateBy { get; set; }
