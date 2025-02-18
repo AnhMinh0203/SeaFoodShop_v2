@@ -12,7 +12,7 @@ using SeafoodShop.DataContext.Dto;
 
 namespace SeafoodShop.Repository
 {
-    public class ProductRepository: IProductRepository
+    public class ProductRepository : IProductRepository
     {
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _env;
@@ -36,6 +36,91 @@ namespace SeafoodShop.Repository
             };
         }
         #endregion
+
+        #region Update or add category
+        public async Task<string> AddOrUpdateCategoryAsync(List<Category> categories)
+        {
+            foreach (var category in categories)
+            {
+                if (category.Id == null)
+                {
+                    _context.Categories.Add(category);
+                }
+                else
+                {
+                    var existingCategory = await _context.Categories.FindAsync(category.Id);
+                    if (existingCategory == null)
+                    {
+                        return "Lỗi: Không tìm thấy loại trên";
+                    }
+                    existingCategory.Name = category.Name;
+                }
+            }
+            await _context.SaveChangesAsync();
+            return "Thao tác thành công!";
+
+        }
+        #endregion
+
+        #region Delete category
+        public async Task<string> DeleteCategoryAsync (string categoryName)
+        {
+            using (var context = _context)
+            {
+                var category = await context.Categories.FirstOrDefaultAsync(c => c.Name == categoryName);
+                if (category == null)
+                {
+                    return "Lỗi: Không tìm thấy loại cần xóa";
+                }
+                context.Categories.Remove(category);
+                await context.SaveChangesAsync();
+                return "Xóa danh mục thành công";
+            }
+        }
+        #endregion
+
+        #region Update or add voucher
+        public async Task<string> AddOrUpdateVoucherAsync(List<Voucher> vouchers)
+        {
+            foreach (var voucher in vouchers)
+            {
+                if (voucher.Id == null)
+                {
+                    _context.Vouchers.Add(voucher);
+                }
+                else
+                {
+                    var existingCategory = await _context.Categories.FindAsync(voucher.Id);
+                    if (existingCategory == null)
+                    {
+                        return "Lỗi: Không tìm thấy voucher trên";
+                    }
+                    existingCategory.Name = voucher.NameVoucher;
+                }
+            }
+            await _context.SaveChangesAsync();
+            return "Thao tác thành công!";
+
+        }
+        #endregion
+
+        #region Delete voucher
+        public async Task<string> DeleteVoucherAsync(string categoryName)
+        {
+            using (var context = _context)
+            {
+                var voucher = await context.Vouchers.FirstOrDefaultAsync(v => v.NameVoucher == categoryName);
+                if (voucher == null)
+                {
+                    return "Lỗi: Không tìm thấy voucher cần xóa";
+                }
+                context.Vouchers.Remove(voucher);
+                await context.SaveChangesAsync();
+                return "Xóa voucher thành công";
+            }
+        }
+        #endregion
+
 
         #region Add product
         public async Task<string> AddProductAsync(ProductDto productDto)
@@ -116,7 +201,7 @@ namespace SeafoodShop.Repository
                         {
                             IdSeaFood = newProductId,
                             IsMain = false,
-                            ImagePath = "/images/" + img.FileName, 
+                            ImagePath = "/images/" + img.FileName,
                             CreateDate = currentTime,
                             CreateBy = productDto.CreateBy,
                             ModifyDate = currentTime,
@@ -134,8 +219,8 @@ namespace SeafoodShop.Repository
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error: {ex.Message}");
-            }     
+                throw new Exception($"Lỗi: {ex.Message}");
+            }
         }
         #endregion
 
@@ -147,7 +232,7 @@ namespace SeafoodShop.Repository
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error: {ex.Message}");
+                throw new Exception($"Lỗi: {ex.Message}");
             }
         }
     }

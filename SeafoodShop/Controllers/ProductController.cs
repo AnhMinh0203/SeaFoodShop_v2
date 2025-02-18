@@ -34,11 +34,58 @@ namespace SeafoodShop.Api.Controllers
         public async Task<ActionResult<string>> AddProduct ([FromForm] ProductDto productDto)
         {
             var result = await _productRepository.AddProductAsync(productDto);
-            if (result.Contains("Error"))
+            if (result.Contains("Lỗi"))
             {
                 return BadRequest(new BaseResponse<string>(false,result));
             }
             return Ok(new BaseResponse<string>(true, result));
         }
+
+        [HttpPost("Add-or-update-category")]
+        public async Task<ActionResult<string>> AddOrUpdateCategory(List<Category> categories)
+        {
+            var result = await _productRepository.AddOrUpdateCategoryAsync(categories);
+            if (result.Contains("Lỗi"))
+            {
+                return BadRequest(new BaseResponse<string>(false, result));
+            }
+            return Ok(new BaseResponse<string>(true, result));
+        }
+
+        [HttpDelete("Delete-category")]
+        public async Task<ActionResult<string>> DeleteCategory (string categoryName)
+        {
+            var result = await _productRepository.DeleteCategoryAsync(categoryName);
+            if (result.Contains("Lỗi"))
+            {
+                return BadRequest(new BaseResponse<string>(false, result));
+            }
+            return Ok(new BaseResponse<string>(true, result));
+        }
+
+
+        [HttpPost("Add-or-update-voucher")]
+        public async Task<ActionResult<string>> AddOrUpdateCategoryVoucher(List<Voucher> vouchers)
+        {
+            var result = await _productRepository.AddOrUpdateVoucherAsync(vouchers);
+            if (result.Contains("Lỗi"))
+            {
+                return BadRequest(new BaseResponse<string>(false, result));
+            }
+            return Ok(new BaseResponse<string>(true, result));
+        }
+
+        [HttpDelete("Delete-voucher")]
+        public async Task<ActionResult<string>> DeleteVoucher(string voucherName)
+        {
+            var result = await _productRepository.DeleteVoucherAsync(voucherName);
+            if (result.Contains("Lỗi"))
+            {
+                return BadRequest(new BaseResponse<string>(false, result));
+            }
+            return Ok(new BaseResponse<string>(true, result));
+        }
+
+
     }
 }

@@ -12,12 +12,12 @@ namespace SeafoodShop.DataContext.Utils
         public string Message { get; set; }
         public T? Data { get; set; }
 
-        public BaseResponse(bool isSuccess, string message, T data)
+/*        public BaseResponse(bool isSuccess, string message, T data)
         {
             IsSuccess = isSuccess;
             Message = message;
             Data = data;
-        }
+        }*/
 
         public BaseResponse(bool isSuccess, T data)
         {

@@ -8,7 +8,7 @@ namespace SeafoodShop.DataContext.Models
 {
     public class Voucher
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
         public string NameVoucher { get; set; }
         public int Percent { get; set; }
         public DateTime StartDate { get; set; }
