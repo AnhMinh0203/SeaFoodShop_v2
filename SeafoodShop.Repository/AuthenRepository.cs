@@ -58,7 +58,7 @@ namespace SeafoodShop.Repository
                 else
                 {
                     userInfor = await _context.Users
-                        .Where(u => u.PhoneNumber == signInModel.Identifier || u.Email == signInModel.Identifier)
+                        .Where(u => u.Email == signInModel.Identifier)
                         .Select(u => new UserInfor
                         {
                             UserId = u.Id,

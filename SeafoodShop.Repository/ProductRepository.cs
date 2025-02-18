@@ -8,6 +8,7 @@ using SeafoodShop.DataContext.Database;
 using SeafoodShop.DataContext.Models;
 using SeafoodShop.Repository.Common;
 using Microsoft.AspNetCore.Hosting;
+using SeafoodShop.DataContext.Dto;
 
 namespace SeafoodShop.Repository
 {
@@ -22,6 +23,20 @@ namespace SeafoodShop.Repository
 
         }
 
+        #region Get product selections
+        public async Task<ProductSelectionsDto> GetProductSelectionsAsync()
+        {
+            var categories = await _context.Categories.ToListAsync();
+            var vouchers = await _context.Vouchers.ToListAsync();
+
+            return new ProductSelectionsDto
+            {
+                Categories = categories,
+                Vouchers = vouchers
+            };
+        }
+        #endregion
+
         #region Add product
         public async Task<string> AddProductAsync(ProductDto productDto)
         {
@@ -34,7 +49,7 @@ namespace SeafoodShop.Repository
                     Name = productDto.Name,
                     Price = productDto.Price,
                     Unit = productDto.Unit,
-                    IdType = productDto.IdType,
+                    IdType = productDto.IdCategory,
                     IdVoucher = productDto.IdVoucher,
                     Quantity = productDto.Quantity,
                     Instruct = productDto.Instruct,

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SeafoodShop.DataContext.Dto;
 using SeafoodShop.DataContext.Models;
 using SeafoodShop.DataContext.Utils;
 using SeafoodShop.Repository.Common;
@@ -22,8 +23,15 @@ namespace SeafoodShop.Api.Controllers
             return Ok(products);
         }
 
+        [HttpGet("Get-product-selections")]
+        public async Task<ActionResult<ProductSelectionsDto>> GetProductSelections()
+        {
+            var productSelections = await _productRepository.GetProductSelectionsAsync();
+            return Ok(new BaseResponse<ProductSelectionsDto>(true, productSelections));
+        }
+
         [HttpPost("Add")]
-        public async Task<ActionResult<string>> AddProduct (ProductDto productDto)
+        public async Task<ActionResult<string>> AddProduct ([FromForm] ProductDto productDto)
         {
             var result = await _productRepository.AddProductAsync(productDto);
             if (result.Contains("Error"))

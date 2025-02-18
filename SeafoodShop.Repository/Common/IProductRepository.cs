@@ -1,4 +1,5 @@
-﻿using SeafoodShop.DataContext.Models;
+﻿using SeafoodShop.DataContext.Dto;
+using SeafoodShop.DataContext.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,5 +12,6 @@ namespace SeafoodShop.Repository.Common
     {
         Task<IEnumerable<Product>> GetAllProductsAsync();
         Task<string> AddProductAsync(ProductDto product);
+        Task<ProductSelectionsDto> GetProductSelectionsAsync();
     }
 }

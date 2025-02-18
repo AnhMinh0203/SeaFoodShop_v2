@@ -13,7 +13,7 @@ namespace SeafoodShop.DataContext.Models
         public string? Name { get; set; }
         public decimal? Price { get; set; }
         public string? Unit { get; set; }
-        public int? IdType { get; set; }
+        public int? IdCategory { get; set; }
         public int? IdVoucher { get; set; }
         public int? Quantity { get; set; }
         public string? Instruct { get; set; }
