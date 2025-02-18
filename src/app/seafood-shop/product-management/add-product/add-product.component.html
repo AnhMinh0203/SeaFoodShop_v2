@@ -1,3 +1,4 @@
+<p-toast />
 <c-card>
   <c-card-header>
     <h5>Thêm sản phẩm</h5>
@@ -12,32 +13,14 @@
       <div class="col-12 col-sm-12 col-md-7 col-lg-7 col-xl-7 ">
         <div class="button_features d-flex justify-content-end align-items-center">
           <div class="me-2 mt-2">
-            <p-button icon="pi pi-box" label="Quản lý đơn vị" severity="success"></p-button>
-          </div>
-          <div class="me-2 mt-2">
-            <p-button icon="pi pi-list" label="Quản lý danh mục" severity="success" />
+            <p-button icon="pi pi-list" label="Quản lý danh mục" severity="success" (click)="showCategoryForm()"/>
           </div>
           <div class="me-2 mt-2">
             <p-button icon="pi pi-tag" label="Quản lý voucher" severity="success" />
           </div>
-
-          <!-- <p-button class="me-3 my-2" icon="pi pi-box" label="Quản lý đơn vị" severity="success" />
-          <p-button class="me-3 my-2" icon="pi pi-list" label="Quản lý danh mục" severity="success" />
-          <p-button class="me-3 my-2" icon="pi pi-tag" label="Quản lý voucher" severity="success" /> -->
         </div>
       </div>
     </div>
-    <!-- <div class="d-flex justify-content-between align-items-center">
-      <div class="button-back">
-        <i class="pi pi-arrow-circle-left" style="font-size: 30px;"></i>
-      </div>
-
-      <div class="button_features">
-        <p-button class="me-3" icon="pi pi-box" label="Quản lý đơn vị" severity="success" />
-        <p-button class="me-3" icon="pi pi-list" label="Quản lý danh mục" severity="success" />
-        <p-button class="me-3" icon="pi pi-tag" label="Quản lý voucher" severity="success" />
-      </div>
-    </div> -->
     <hr>
 
     <div class="product-infor">
@@ -47,51 +30,53 @@
           <div class="row">
             <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ">
               <div class="d-flex flex-column">
-                <label for="username" class="block mt-3">Tên sản phẩm</label>
-                <input pInputText id="username" aria-describedby="username-help" [(ngModel)]="value" />
+                <label for="name" class="block mt-3">Tên sản phẩm</label>
+                <input pInputText id="name" [(ngModel)]="name" />
               </div>
             </div>
             <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ">
               <div class="d-flex flex-column">
-                <label for="username" class="block mt-3">Giá</label>
-                <input pInputText id="username" aria-describedby="username-help" [(ngModel)]="value" />
+                <label for="price" class="block mt-3">Giá</label>
+                <input pInputText id="price" [(ngModel)]="price" />
               </div>
             </div>
             <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ">
               <div class="d-flex flex-column">
-                <label for="username" class="block mt-3">Xuất xứ</label>
-                <input pInputText id="username" aria-describedby="username-help" [(ngModel)]="value" />
+                <label for="origin" class="block mt-3">Xuất xứ</label>
+                <input pInputText id="origin" [(ngModel)]="origin" />
               </div>
             </div>
 
             <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ">
               <div class="d-flex flex-column">
-                <label for="username" class="block mt-3">Số lượng</label>
-                <input pInputText id="username" aria-describedby="username-help" [(ngModel)]="value" />
+                <label for="quantity" class="block mt-3">Số lượng</label>
+
+                <p-inputnumber inputId="integeronly" [(ngModel)]="quantity" />
               </div>
             </div>
             <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ">
               <div class="d-flex flex-column">
-                <label for="username" class="block mt-3">Hướng dẫn</label>
-                <input pInputText id="username" aria-describedby="username-help" [(ngModel)]="value" />
+                <label for="instruct" class="block mt-3">Hướng dẫn</label>
+                <input pInputText id="instruct" [(ngModel)]="instruct" />
               </div>
             </div>
             <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ">
               <div class="d-flex flex-column">
-                <label for="username" class="block mt-3">Đơn vị</label>
-                <p-select [options]="value" [(ngModel)]="value" optionLabel="name" class="w-full md:w-56" />
+                <label for="unit" class="block mt-3">Đơn vị</label>
+                <!-- <p-select [options]="unit" [(ngModel)]="unitSelect" optionLabel="unit" class="w-full md:w-56" /> -->
+                <input pInputText id="unit" [(ngModel)]="unit" />
               </div>
             </div>
             <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ">
               <div class="d-flex flex-column">
-                <label for="username" class="block mt-3">Loại</label>
-                <p-select [options]="value" [(ngModel)]="value" optionLabel="name" class="w-full md:w-56" />
+                <label for="category" class="block mt-3">Loại</label>
+                <p-select [options]="categories" [(ngModel)]="categorySelect" optionLabel="name" class="w-full md:w-56" />
               </div>
             </div>
             <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ">
               <div class="d-flex flex-column">
-                <label for="username" class="block mt-3">Mã giảm giá</label>
-                <p-select [options]="value" [(ngModel)]="value" optionLabel="name" class="w-full md:w-56" />
+                <label for="voucher" class="block mt-3">Mã giảm giá</label>
+                <p-select [options]="vouchers" [(ngModel)]="voucherSelect" optionLabel="nameVoucher" class="w-full md:w-56" />
               </div>
             </div>
           </div>
@@ -101,24 +86,24 @@
         <div class="col-12 col-sm-12 col-md-5 col-lg-5 col-xl-5 ">
           <div class="d-flex justify-content-start">
             <p-fileupload mode="basic" name="demo[]" chooseIcon="pi pi-image" accept="image/*" maxFileSize="1000000"
-              (onSelect)="onUpload($event)" [auto]="true" chooseLabel="Chọn ảnh chính" />
+              (onSelect)="onUploadPrimaryImg($event)" [auto]="true" chooseLabel="Chọn ảnh chính" />
           </div>
           <div class="mt-3 border">
-            <p-image *ngIf="primaryImg" [src]="primaryImg" alt="Image" width="100%" [preview]="true" />
+            <p-image *ngIf="primaryImgDisplay" [src]="primaryImgDisplay" alt="Image" width="100%" [preview]="true" />
           </div>
         </div>
 
         <div class="col-12 col-sm-12 col-md-7 col-lg-7 col-xl-7 ">
           <div class="">
             <p-fileupload name="demo[]" [multiple]="true" accept="image/*" maxFileSize="1000000" mode="advanced"
-              [auto]="true" chooseLabel="Chọn ảnh phụ">
+              [auto]="true" chooseLabel="Chọn ảnh phụ"  (onSelect)="onUploadChildrenImg($event)"  (onRemove)="onRemoveChildrenImg($event)">
               <ng-template #empty>
                 <div>Kéo và thả tệp vào đây để tải lên.</div>
               </ng-template>
               <ng-template #content>
-                <ul *ngIf="uploadedFiles.length">
-                  <li *ngFor="let file of uploadedFiles">{{ file.name }} - {{ file.size }} bytes</li>
-                </ul>
+                <!-- <ul *ngIf="childrenImages.length">
+                  <li *ngFor="let file of childrenImages">{{ file.name }} - {{ file.size }} bytes</li>
+                </ul> -->
               </ng-template>
             </p-fileupload>
           </div>
@@ -129,21 +114,38 @@
           <div class="product-desc">
             <div id="editor" class="mb-5"></div>
             <div class="d-flex justify-content-end">
-              <p-button label="Xác nhận" (click)="showContent()" />
+              <p-button label="Xác nhận" (click)="addProduct()" />
             </div>
-
-            <!-- <div class="row">
-              <div class="col col-2"></div>
-              <div class="col col-8">
-                <div class="content-wrapper">
-                  <div [innerHTML]="contentHtml"></div>
-                </div>
-              </div>
-              <div class="col col-2"></div>
-            </div> -->
           </div>
         </div>
       </div>
     </div>
   </c-card-body>
 </c-card>
+
+<!-- Category management form -->
+<div class="card flex justify-center">
+  <p-dialog header="Quản lý danh mục" [(visible)]="visibleCategoryForm" [modal]="true"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '60vw' }" [draggable]="false"
+    [resizable]="false">
+    <p-table
+    [value]="categories"
+    showGridlines
+    [tableStyle]="{ 'min-width': '50rem' }">
+        <ng-template #header>
+            <tr>
+                <th>STT</th>
+                <th>Tên loại</th>
+                <th>Hành động</th>
+            </tr>
+        </ng-template>
+        <ng-template #body let-category>
+            <tr>
+                <td>1</td>
+                <td>{{ category.name }}</td>
+                <td></td>
+            </tr>
+        </ng-template>
+</p-table>
+  </p-dialog>
+</div>

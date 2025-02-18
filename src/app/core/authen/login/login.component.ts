@@ -6,7 +6,6 @@ import { RouterModule, Router } from '@angular/router';
 import { AuthenService } from '../services/authen.service';
 import { MessageService } from 'primeng/api';
 import { Toast } from 'primeng/toast';
-import { Ripple } from 'primeng/ripple';
 
 @Component({
   selector: 'app-login',
@@ -18,7 +17,6 @@ import { Ripple } from 'primeng/ripple';
     ButtonModule,
     RouterModule,
     Toast,
-    Ripple
   ],
   providers: [MessageService],
   templateUrl: './login.component.html',
