@@ -10,7 +10,7 @@ namespace SeafoodShop.Repository.Common
 {
     public interface IProductRepository
     {
-        Task<IEnumerable<Product>> GetAllProductsAsync();
+        Task<IEnumerable<ProductDetailDto>> GetAllProductsAsync();
         Task<string> AddProductAsync(ProductDto product);
         Task<ProductSelectionsDto> GetProductSelectionsAsync();
         Task<string> AddOrUpdateCategoryAsync(List<Category> categories);

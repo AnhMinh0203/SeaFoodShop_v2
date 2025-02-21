@@ -1,3 +1,4 @@
+using Azure.Storage.Blobs;
 using Microsoft.EntityFrameworkCore;
 using SeafoodShop.DataContext.Database;
 using SeafoodShop.Repository;
@@ -14,8 +15,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration["ConnectionString"])
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
+
+builder.Services.AddSingleton(x =>
+    new BlobServiceClient(builder.Configuration.GetConnectionString("AzureCloud"))
+);
+
 // Add cross
 builder.Services.AddCors(options =>
 {

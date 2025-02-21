@@ -9,6 +9,10 @@ using SeafoodShop.DataContext.Models;
 using SeafoodShop.Repository.Common;
 using Microsoft.AspNetCore.Hosting;
 using SeafoodShop.DataContext.Dto;
+using Azure.Storage.Blobs;
+using Microsoft.AspNetCore.Http;
+using Azure.Storage.Blobs.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace SeafoodShop.Repository
 {
@@ -16,11 +20,14 @@ namespace SeafoodShop.Repository
     {
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _env;
-        public ProductRepository(AppDbContext context, IWebHostEnvironment env)
+        private readonly BlobServiceClient _blobServiceClient;
+        private readonly string? _containerProduct;
+        public ProductRepository(AppDbContext context, IWebHostEnvironment env, BlobServiceClient blobServiceClient, IConfiguration configuration)
         {
             _context = context;
             _env = env;
-
+            _blobServiceClient = blobServiceClient;
+            _containerProduct = configuration["containerProduct"];
         }
 
         #region Get product selections
@@ -63,7 +70,7 @@ namespace SeafoodShop.Repository
         #endregion
 
         #region Delete category
-        public async Task<string> DeleteCategoryAsync (string categoryName)
+        public async Task<string> DeleteCategoryAsync(string categoryName)
         {
             using (var context = _context)
             {
@@ -90,12 +97,15 @@ namespace SeafoodShop.Repository
                 }
                 else
                 {
-                    var existingCategory = await _context.Categories.FindAsync(voucher.Id);
-                    if (existingCategory == null)
+                    var existingVoucher = await _context.Vouchers.FindAsync(voucher.Id);
+                    if (existingVoucher == null)
                     {
                         return "Lỗi: Không tìm thấy voucher trên";
                     }
-                    existingCategory.Name = voucher.NameVoucher;
+                    existingVoucher.NameVoucher = voucher.NameVoucher;
+                    existingVoucher.Percent = voucher.Percent;
+                    existingVoucher.StartDate = voucher.StartDate;
+                    existingVoucher.EndDate = voucher.EndDate;
                 }
             }
             await _context.SaveChangesAsync();
@@ -105,11 +115,11 @@ namespace SeafoodShop.Repository
         #endregion
 
         #region Delete voucher
-        public async Task<string> DeleteVoucherAsync(string categoryName)
+        public async Task<string> DeleteVoucherAsync(string voucherName)
         {
             using (var context = _context)
             {
-                var voucher = await context.Vouchers.FirstOrDefaultAsync(v => v.NameVoucher == categoryName);
+                var voucher = await context.Vouchers.FirstOrDefaultAsync(v => v.NameVoucher == voucherName);
                 if (voucher == null)
                 {
                     return "Lỗi: Không tìm thấy voucher cần xóa";
@@ -122,8 +132,8 @@ namespace SeafoodShop.Repository
         #endregion
 
 
-        #region Add product
-        public async Task<string> AddProductAsync(ProductDto productDto)
+        #region Add product (save img in server)
+        /*public async Task<string> AddProductAsync(ProductDto productDto)
         {
             try
             {
@@ -221,19 +231,153 @@ namespace SeafoodShop.Repository
             {
                 throw new Exception($"Lỗi: {ex.Message}");
             }
-        }
+        }*/
         #endregion
 
-        public async Task<IEnumerable<Product>> GetAllProductsAsync()
+        #region Add product (save img in cloud)
+        public async Task<string> AddProductAsync(ProductDto productDto)
         {
             try
             {
-                return await _context.SeaFoods.ToListAsync();
+                DateTime currentTime = DateTime.UtcNow.AddHours(7);
+
+                var product = new Product
+                {
+                    Name = productDto.Name,
+                    Price = productDto.Price,
+                    Unit = productDto.Unit,
+                    IdType = productDto.IdCategory,
+                    IdVoucher = productDto.IdVoucher,
+                    Quantity = productDto.Quantity,
+                    Instruct = productDto.Instruct,
+                    Origin = productDto.Origin,
+                    Description = productDto.Description,
+                    CreateDate = currentTime,
+                    CreateBy = productDto.CreateBy,
+                    ModifyDate = currentTime,
+                    ModifyBy = productDto.ModifyBy
+                };
+
+                // Thêm sản phẩm vào database
+                _context.SeaFoods.Add(product);
+                await _context.SaveChangesAsync();
+
+                int newProductId = product.Id;
+                var images = new List<Image>();
+
+                var containerClient = _blobServiceClient.GetBlobContainerClient(_containerProduct);
+
+                // Tải ảnh chính
+                if (productDto.PrimaryImg != null)
+                {
+                    string primaryImgUrl = await UploadFileToAzure(productDto.PrimaryImg, containerClient);
+                    images.Add(new Image
+                    {
+                        IdSeaFood = newProductId,
+                        IsMain = true,
+                        ImagePath = primaryImgUrl,
+                        CreateDate = currentTime,
+                        CreateBy = productDto.CreateBy,
+                        ModifyDate = currentTime,
+                        ModifyBy = productDto.ModifyBy
+                    });
+                }
+
+                // Tải ảnh con
+                if (productDto.ChildImg?.Any() == true)
+                {
+                    foreach (var img in productDto.ChildImg)
+                    {
+                        string childImageUrl = await UploadFileToAzure(img, containerClient);
+
+                        images.Add(new Image
+                        {
+                            IdSeaFood = newProductId,
+                            IsMain = false,
+                            ImagePath = childImageUrl,
+                            CreateDate = currentTime,
+                            CreateBy = productDto.CreateBy,
+                            ModifyDate = currentTime,
+                            ModifyBy = productDto.ModifyBy
+                        });
+                    }
+                }
+
+                if (images.Any())
+                {
+                    _context.Images.AddRange(images);
+                    await _context.SaveChangesAsync();
+                }
+
+                return "Thêm mới sản phẩm thành công";
             }
             catch (Exception ex)
             {
                 throw new Exception($"Lỗi: {ex.Message}");
             }
         }
+
+        private async Task<string> UploadFileToAzure(IFormFile imgFile, BlobContainerClient containerClient)
+        {
+            string fileName = Guid.NewGuid().ToString() + Path.GetExtension(imgFile.FileName);
+            var blobClient = containerClient.GetBlobClient(fileName);
+
+            using (var stream = imgFile.OpenReadStream())
+            {
+                await blobClient.UploadAsync(stream, new BlobHttpHeaders { ContentType = imgFile.ContentType });
+
+            }
+            return blobClient.Uri.ToString();
+        }
+        #endregion
+
+        public async Task<IEnumerable<ProductDetailDto>> GetAllProductsAsync()
+        {
+            try
+            {
+                var products = await _context.SeaFoods
+                    .GroupJoin(
+                        _context.Images,
+                        sf => sf.Id,
+                        img => img.IdSeaFood,
+                        (sf, imgs) => new ProductDetailDto
+                        {
+                            Id = sf.Id,
+                            Name = sf.Name,
+                            Price = sf.Price,
+                            Unit = sf.Unit,
+                            IdType = sf.IdType,
+                            IdVoucher = sf.IdVoucher,
+                            Quantity = sf.Quantity,
+                            Instruct = sf.Instruct,
+                            Origin = sf.Origin,
+                            Description = sf.Description,
+                            CreateDate = sf.CreateDate,
+                            CreateBy = sf.CreateBy,
+                            ModifyDate = sf.ModifyDate,
+                            ModifyBy = sf.ModifyBy,
+
+                            // Ảnh chính: Lấy ảnh đầu tiên hoặc ảnh có IsPrimary = true
+                            PrimaryImg = imgs.OrderBy(img => (bool)img.IsMain ? 0 : 1)
+                                             .ThenBy(img => img.Id)
+                                             .Select(img => img.ImagePath)
+                                             .FirstOrDefault(),
+
+                            // Danh sách ảnh phụ (bỏ ảnh chính)
+                            ChildrenImg = imgs.Where(img => !(bool)img.IsMain) 
+                                              .OrderBy(img => img.Id)
+                                              .Select(img => img.ImagePath)
+                                              .ToList()
+
+                        }).ToListAsync();
+
+                return products;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi: {ex.Message}");
+            }
+        }
+
     }
 }

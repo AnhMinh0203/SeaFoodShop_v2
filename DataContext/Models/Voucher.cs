@@ -11,11 +11,11 @@ namespace SeafoodShop.DataContext.Models
         public int? Id { get; set; }
         public string NameVoucher { get; set; }
         public int Percent { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public DateTime CreateDate { get; set; }
+        public DateOnly StartDate { get; set; }
+        public DateOnly EndDate { get; set; }
+        public DateOnly CreateDate { get; set; }
         public Guid CreateBy { get; set; }
-        public DateTime? ModifyDate { get; set; }  
+        public DateOnly? ModifyDate { get; set; }  
         public Guid ModifyBy { get; set; }
        
     }
