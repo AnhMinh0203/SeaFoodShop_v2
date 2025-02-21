@@ -75,4 +75,13 @@ export class ProductService {
       );
   }
 
+  getProducts() {
+    var apiUrl = `${this.serviceUri}/Get-products`;
+    return this.http.get(apiUrl)
+      .pipe(
+        catchError((error: any) => {
+          throw error;
+        })
+      );
+  }
 }

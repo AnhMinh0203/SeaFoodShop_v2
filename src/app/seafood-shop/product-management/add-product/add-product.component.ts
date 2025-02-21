@@ -27,6 +27,19 @@ import { ToastModule } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
 import { DatePickerModule } from 'primeng/datepicker';
 
+
+interface Voucher {
+  id?: number;
+  nameVoucher: string;
+  percent: number;
+  startDate: Date;
+  endDate: Date;
+  createDate: Date;
+  createBy: string;
+  modifyDate?: Date;
+  modifyBy: string;
+}
+
 @Component({
   selector: 'app-add-product',
   imports: [
@@ -63,7 +76,8 @@ export class AddProductComponent {
   unit: any;
   categories: any;
   categorySelect: any;
-  vouchers: any[] = [{ id: null, nameVoucher: 'Không có voucher' }];
+  vouchers: Array<Voucher> = [];
+
   voucherSelect: any;
   quantity: any;
   instruct: any;
@@ -133,6 +147,17 @@ export class AddProductComponent {
 
   onUploadPrimaryImg(event: any) {
     const file = event.files[0];
+    const maxSizeKB = 1000;
+    console.log(file.size);
+    if (file.size / 1024 > maxSizeKB){ // 1mb
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Cảnh báo',
+        detail: 'Kích thước ảnh không được lớn hơn 1MB'
+      });
+      return ;
+    }
+
     const reader = new FileReader();
     this.primaryImg = file;
     reader.onload = (e: any) => {
@@ -142,18 +167,46 @@ export class AddProductComponent {
     reader.readAsDataURL(file);
   }
 
-  onUploadChildrenImg(event: any) {
-    const files = Array.from(event.files) as File[];
-    const newFiles = files.map((file) => ({
-      file: file,
-      previewUrl: URL.createObjectURL(file),
-    }));
+  // onUploadChildrenImg(event: any) {
+  //   const files = Array.from(event.files) as File[];
+  //   const newFiles = files.map((file) => ({
+  //     file: file,
+  //     previewUrl: URL.createObjectURL(file),
+  //   }));
 
-    // Nối các file mới vào mảng childrenImages hiện có
+  //   // Nối các file mới vào mảng childrenImages hiện có
+  //   this.childrenImages = [...this.childrenImages, ...newFiles];
+
+  //   console.log(this.childrenImages);
+  // }
+
+  onUploadChildrenImg(event: any) {
+    const maxSizeKB = 1000;
+    const files = Array.from(event.files) as File[];
+
+    const newFiles = files
+      .filter((file) => {
+        if (file.size / 1024 > maxSizeKB) {
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Cảnh báo',
+            detail: 'Kích thước ảnh không được lớn hơn 1MB'
+          });
+          return false;
+        }
+        return true;
+      })
+      .map((file) => ({
+        file: file,
+        previewUrl: URL.createObjectURL(file),
+      }));
+
+    // Giữ nguyên danh sách ảnh đã chọn trước đó
     this.childrenImages = [...this.childrenImages, ...newFiles];
 
-    console.log(this.childrenImages);
+    console.log("Danh sách ảnh hiện tại:", this.childrenImages);
   }
+
 
 
   onRemoveChildrenImg(event: any) {
@@ -166,11 +219,53 @@ export class AddProductComponent {
     console.log('After remove:', this.childrenImages);
   }
 
+
+
   navigateToProductManagement() {
     this.router.navigate(['/product-management']);
   }
 
+  showWarning(message: string) {
+    this.messageService.add({ severity: 'warn', summary: 'Cảnh báo', detail: message });
+  }
+
   addProduct() {
+    if (!this.name || this.name.trim() === "") {
+      this.showWarning("Tên sản phẩm không được để trống!");
+      return;
+    }
+    if (!this.price || isNaN(this.price) || this.price <= 0) {
+      this.showWarning("Giá sản phẩm không hợp lệ!");
+      return;
+    }
+    if (!this.unit || this.unit.trim() === "") {
+      this.showWarning("Đơn vị không được để trống!");
+      return;
+    }
+
+    if (!this.quantity || isNaN(this.quantity) || this.quantity < 0) {
+      this.showWarning("Số lượng sản phẩm không hợp lệ!");
+      return;
+    }
+    if (!this.instruct || this.instruct.trim() === "") {
+      this.showWarning("Hướng dẫn sử dụng không được để trống!");
+      return;
+    }
+
+    if (!this.origin || this.origin.trim() === "") {
+      this.showWarning("Xuất xứ không được để trống!");
+      return;
+    }
+    if (!this.quill.root.innerHTML || this.quill.root.innerHTML.trim() === "<p><br></p>") {
+      this.showWarning("Mô tả sản phẩm không được để trống!");
+      return;
+    }
+
+    if (!this.primaryImg) {
+      this.showWarning("Vui lòng chọn ảnh chính cho sản phẩm!");
+      return;
+    }
+
     const formData = new FormData();
 
     // formData.append("Id", "0");
@@ -214,7 +309,11 @@ export class AddProductComponent {
     this._productService.getProductSelections().subscribe((res: any) => {
       if (res && res.isSuccess == true) {
         this.categories = res.data.categories;
-        this.vouchers = [...this.vouchers, ...res.data.vouchers];
+        this.vouchers = res.data.vouchers.map((voucher:Voucher) => ({
+          ...voucher,
+          startDate: new Date(voucher.startDate),
+          endDate: new Date(voucher.endDate)
+        }));
 
       }
       if (this.categories && this.categories.length > 0) {
@@ -236,7 +335,7 @@ export class AddProductComponent {
   deleteCategory(category: any, event: Event) {
     if (!category.name || category.name.trim() === '') {
       this.messageService.add({
-        severity: 'error',
+        severity: 'warn',
         summary: 'Lỗi',
         detail: 'Tên loại không hợp lệ, không thể xóa.'
       });
@@ -320,11 +419,11 @@ export class AddProductComponent {
   }
 
   deleteVoucher(voucher: any, event: Event) {
-    if (!voucher.name || voucher.name.trim() === '') {
+    if (!voucher.nameVoucher || voucher.nameVoucher.trim() === '') {
       this.messageService.add({
-        severity: 'error',
+        severity: 'warn',
         summary: 'Lỗi',
-        detail: 'Tên loại không hợp lệ, không thể xóa.'
+        detail: 'Tên voucher không hợp lệ, không thể xóa.'
       });
       return;
     }
@@ -333,7 +432,7 @@ export class AddProductComponent {
       this.messageService.add({
         severity: 'warn',
         summary: 'Cảnh báo',
-        detail: 'Bạn chưa cập nhật danh mục vào hệ thống. Vui lòng cập nhật trước khi xóa.'
+        detail: 'Bạn chưa cập nhật voucher vào hệ thống. Vui lòng cập nhật trước khi xóa.'
       });
       return;
     }
@@ -355,7 +454,7 @@ export class AddProductComponent {
       },
 
       accept: () => {
-        this._productService.deleteVoucher(voucher.name).subscribe((res: any) => {
+        this._productService.deleteVoucher(voucher.nameVoucher).subscribe((res: any) => {
 
           if (res && res.isSuccess == true) {
             this.getProductSelections();
@@ -370,22 +469,56 @@ export class AddProductComponent {
   }
 
   addVoucher() {
-    this.categories.push({ name: '' });
+    this.vouchers.push({
+      nameVoucher: '',
+      percent: 0,
+      startDate: new Date(),
+      endDate: new Date(),
+      createDate: new Date(),
+      createBy: '85CC6F37-2B80-40C8-A9A8-71C1E7B653A0',
+      modifyBy: '85CC6F37-2B80-40C8-A9A8-71C1E7B653A0'
+    });
+  }
+
+  formatDate(date: any) {
+    if (!date) return null;
+    const d = new Date(date);
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().split("T")[0];
   }
 
   addOrUpdateVoucher() {
-    const invalidCategories = this.categories.filter((c:any) => !c.name || c.name.trim() === "");
-
-    if (invalidCategories.length > 0) {
+    const invalidVoucher = this.vouchers.filter((v: any) =>
+      !v.nameVoucher || v.nameVoucher.trim() === "" ||
+      !v.startDate || !v.endDate
+    );
+    if (invalidVoucher.length > 0) {
       this.messageService.add({
-        severity: "error",
-        summary: "Lỗi",
-        detail: "Tên loại không được để trống."
+        severity: "warn",
+        summary: "Cảnh báo",
+        detail: "Vui lòng điền đủ thông tin voucher"
       });
-      return; // Dừng lại, không gửi request lên API
+      return;
     }
 
-    this._productService.addOrUpdateVoucher(this.vouchers).subscribe((res: any) => {
+    for (let v of this.vouchers) {
+      if (new Date(v.startDate) > new Date(v.endDate)) {
+        this.messageService.add({
+          severity: "warn",
+          summary: "Lỗi",
+          detail: `Ngày kết thúc không được nhỏ hơn ngày bắt đầu!`
+        });
+        return;
+      }
+    }
+    const formattedVouchers = this.vouchers.map((v: any) => ({
+      ...v,
+      startDate: this.formatDate(v.startDate),
+      endDate: this.formatDate(v.endDate),
+      createDate: this.formatDate(v.createDate)
+    }));
+
+    this._productService.addOrUpdateVoucher(formattedVouchers).subscribe((res: any) => {
       if (res && res.isSuccess == true) {
         console.log(res);
         this.getProductSelections();
@@ -396,13 +529,13 @@ export class AddProductComponent {
     });
   }
 
-  formatDate(date: string): string {
-    const d = new Date(date);
-    const day = ("0" + d.getDate()).slice(-2);  // Lấy ngày và thêm số 0 nếu cần
-    const month = ("0" + (d.getMonth() + 1)).slice(-2);  // Lấy tháng (tháng bắt đầu từ 0)
-    const year = d.getFullYear();  // Lấy năm
+  isExpired(endDate: any): boolean {
+    if (!endDate) return false;
+    const today = new Date().toISOString().split("T")[0]; // Lấy ngày hiện tại (yyyy-MM-dd)
+    const voucherEndDate = new Date(endDate).toISOString().split("T")[0]; // Lấy ngày của voucher
 
-    return `${day}/${month}/${year}`;
+    return voucherEndDate <= today; // Nếu ngày kết thúc <= hôm nay => Hết hạn
   }
+
 
 }

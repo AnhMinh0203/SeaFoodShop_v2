@@ -14,7 +14,10 @@
     </div>
     <hr>
 
-    <div class="d-flex justify-content-end">
+    <div class="d-flex justify-content-between">
+      <div>
+        <p-button icon="pi pi-refresh" (click)="loadProducts()" severity="info" />
+      </div>
       <div>
         <c-input-group class="mb-3">
           <input aria-describedby="button-addon2" aria-label="Nhập tên sản phẩm" cFormControl
@@ -24,72 +27,40 @@
           </button>
         </c-input-group>
       </div>
-    </div>
-    <p-table [value]="products" [tableStyle]="{'min-width': '60rem'}">
 
-      <ng-template pTemplate="header">
+    </div>
+    <p-table [value]="products" [paginator]="true" [rows]="5" [tableStyle]="{ 'min-width': '50rem' }"
+      [rowsPerPageOptions]="[5, 10, 20]">
+      <ng-template #header>
         <tr>
           <th>Tên sản phẩm</th>
           <th>Hình ảnh</th>
-          <th>Giá</th>
           <th>Loại</th>
-          <th>Tình trạng</th>
+          <th>Giá</th>
+          <th>Đơn vị</th>
+          <th>Tồn kho</th>
           <th>Hành động</th>
         </tr>
       </ng-template>
-      <ng-template pTemplate="body" let-product>
+      <ng-template #body let-product>
         <tr>
           <td>{{product.name}}</td>
-          <td><img
-              [src]="'https://image.tienphong.vn/w890/Uploaded/2025/rkznae/2020_12_28/55832_hai_san_nha_trang_JLSC.jpg'"
-              [alt]="product.name" width="100" class="shadow-4" /></td>
+          <td><img [src]="product.primaryImg" [alt]="product.name" width="100" class="shadow-4" /></td>
+          <td>{{product.idType}}</td>
           <td>{{product.price }}</td>
-          <td>{{product.category}}</td>
 
-          <td><p-tag [value]="product.inventoryStatus" [severity]="getSeverity(product.inventoryStatus)" /></td>
+          <td>{{product.unit }}</td>
+
+          <td><p-tag [value]="product.quantity" /></td>
           <td>
-            <p-button icon="pi pi-pen-to-square" (click)="showDialog()" severity="info"
+            <p-button icon="pi pi-pen-to-square" (click)="showDialog(product)" severity="info"
               class="p-button-rounded p-button-sm" />
-            <p-button icon="pi pi-trash" severity="danger"  class="p-button-rounded p-button-sm" />
+            <p-button icon="pi pi-trash" severity="danger" class="p-button-rounded p-button-sm" />
           </td>
         </tr>
-        <tr>
-          <td>{{product.name}}</td>
-          <td><img
-              [src]="'https://image.tienphong.vn/w890/Uploaded/2025/rkznae/2020_12_28/55832_hai_san_nha_trang_JLSC.jpg'"
-              [alt]="product.name" width="100" class="shadow-4" /></td>
-          <td>{{product.price }}</td>
-          <td>{{product.category}}</td>
 
-          <td><p-tag [value]="product.inventoryStatus" [severity]="getSeverity(product.inventoryStatus)" /></td>
-          <td>
-            <p-button icon="pi pi-pen-to-square" (click)="showDialog()" severity="info"
-              class="p-button-rounded p-button-sm" />
-            <p-button icon="pi pi-trash" severity="danger"  class="p-button-rounded p-button-sm" />
-          </td>
-        </tr>
-        <tr>
-          <td>{{product.name}}</td>
-          <td><img
-              [src]="'https://image.tienphong.vn/w890/Uploaded/2025/rkznae/2020_12_28/55832_hai_san_nha_trang_JLSC.jpg'"
-              [alt]="product.name" width="100" class="shadow-4" /></td>
-          <td>{{product.price }}</td>
-          <td>{{product.category}}</td>
-
-          <td><p-tag [value]="product.inventoryStatus" [severity]="getSeverity(product.inventoryStatus)" /></td>
-          <td>
-            <p-button icon="pi pi-pen-to-square" (click)="showDialog()" severity="info"
-              class="p-button-rounded p-button-sm" />
-            <p-button icon="pi pi-trash" severity="danger"  class="p-button-rounded p-button-sm" />
-          </td>
-        </tr>
       </ng-template>
-
     </p-table>
-    <div class="card flex justify-center mt-2">
-      <p-paginator (onPageChange)="onPageChange($event)" [first]="first" [rows]="rows" [totalRecords]="120"
-        [rowsPerPageOptions]="[10, 20, 30]" />
-    </div>
   </c-card-body>
 </c-card>
 
@@ -97,7 +68,7 @@
 <!-- Product detail -->
 <div class="card flex justify-center">
   <!-- <p-button (click)="showDialog()" label="Show" /> -->
-  <p-dialog header="Chi tiết sản phẩm" [(visible)]="visible" [modal]="true"
+  <p-dialog *ngIf="productSelect" header="Chi tiết sản phẩm" [(visible)]="visible" [modal]="true"
     [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '80vw' }" [draggable]="false"
     [resizable]="false">
     <c-card-body class="p-4">
@@ -108,39 +79,39 @@
             <div class="row">
               <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ">
                 <div class="d-flex flex-column">
-                  <label for="username" class="block mt-3">Tên sản phẩm</label>
-                  <input pInputText id="username" aria-describedby="username-help" [(ngModel)]="value" />
+                  <label for="productName" class="block mt-3">Tên sản phẩm</label>
+                  <input pInputText id="productName" [(ngModel)]="productSelect.name" />
                 </div>
               </div>
               <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ">
                 <div class="d-flex flex-column">
-                  <label for="username" class="block mt-3">Giá</label>
-                  <input pInputText id="username" aria-describedby="username-help" [(ngModel)]="value" />
+                  <label for="productPrice" class="block mt-3">Giá</label>
+                  <input pInputText id="productPrice" [(ngModel)]="productSelect.price" />
                 </div>
               </div>
               <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ">
                 <div class="d-flex flex-column">
-                  <label for="username" class="block mt-3">Xuất xứ</label>
-                  <input pInputText id="username" aria-describedby="username-help" [(ngModel)]="value" />
+                  <label for="productOrigin" class="block mt-3">Xuất xứ</label>
+                  <input pInputText id="productOrigin" [(ngModel)]="productSelect.origin" />
                 </div>
               </div>
 
               <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ">
                 <div class="d-flex flex-column">
-                  <label for="username" class="block mt-3">Số lượng</label>
-                  <input pInputText id="username" aria-describedby="username-help" [(ngModel)]="value" />
+                  <label for="productQuantity" class="block mt-3">Số lượng</label>
+                  <input pInputText id="productQuantity" [(ngModel)]="productSelect.quantity" />
                 </div>
               </div>
               <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ">
                 <div class="d-flex flex-column">
-                  <label for="username" class="block mt-3">Hướng dẫn</label>
-                  <input pInputText id="username" aria-describedby="username-help" [(ngModel)]="value" />
+                  <label for="productGuide" class="block mt-3">Hướng dẫn</label>
+                  <input pInputText id="productGuide" [(ngModel)]="productSelect.instruct" />
                 </div>
               </div>
               <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ">
                 <div class="d-flex flex-column">
-                  <label for="username" class="block mt-3">Đơn vị</label>
-                  <p-select [options]="value" [(ngModel)]="value" optionLabel="name" class="w-full md:w-56" />
+                  <label for="productUnit" class="block mt-3">Đơn vị</label>
+                  <input pInputText id="productUnit" [(ngModel)]="productSelect.unit" />
                 </div>
               </div>
               <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 ">
@@ -165,43 +136,45 @@
                 (onSelect)="onUpload($event)" [auto]="true" chooseLabel="Chọn ảnh chính" />
             </div>
             <div class="mt-3 border">
-              <p-image *ngIf="primaryImg" [src]="primaryImg" alt="Image" width="100%" [preview]="true" />
+              <p-image *ngIf="productSelect.primaryImg" [src]="productSelect.primaryImg" alt="Image" width="100%"
+                [preview]="true" />
             </div>
           </div>
 
-          <div class="col-12 col-sm-12 col-md-7 col-lg-7 col-xl-7 ">
-            <div class="">
-              <p-fileupload name="demo[]" [multiple]="true" accept="image/*" maxFileSize="1000000" mode="advanced"
-                [auto]="true" chooseLabel="Chọn ảnh phụ">
-                <ng-template #empty>
-                  <div>Kéo và thả tệp vào đây để tải lên.</div>
-                </ng-template>
-                <ng-template #content>
-                  <ul *ngIf="uploadedFiles.length">
-                    <li *ngFor="let file of uploadedFiles">{{ file.name }} - {{ file.size }} bytes</li>
-                  </ul>
-                </ng-template>
-              </p-fileupload>
+            <div class="col-12 col-sm-12 col-md-7 col-lg-7 col-xl-7 ">
+              <div class="">
+
+                <p-fileUpload #fileUploader name="demo[]" customUpload="true" multiple="true" [showUploadButton]="false"
+                  [showCancelButton]="false" >
+
+                  <ng-template pTemplate="content">
+                    <div class="p-fileupload-file-list">
+                      <div class="p-fileupload-file ng-star-inserted" *ngFor="let img of productSelect.childrenImg; let i = index">
+                        <img class="p-fileupload-file-thumbnail" [src]="img" width="50">
+                        <div class="p-fileupload-file-info">
+                          <div class="p-fileupload-file-name">Ảnh {{ i + 1 }}</div>
+                        </div>
+                        <div class="p-fileupload-file-actions">
+                          <button class="p-ripple p-button p-component p-button-icon-only p-button-danger p-button-rounded p-button-text"
+                                  (click)="removeImage(i)">
+                            <i class="pi pi-times"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-template>
+
+                </p-fileUpload>
+              </div>
             </div>
-          </div>
 
           <h6 class="mt-5"><b>3. Mô tả</b></h6>
           <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 ">
             <div class="product-desc">
               <div id="editorProductManagement" class="mb-5"></div>
               <div class="d-flex justify-content-end">
-                <p-button label="Xác nhận" (click)="showContent()" />
+                <p-button label="Cập nhật" (click)="showContent()" />
               </div>
-
-              <!-- <div class="row">
-                <div class="col col-2"></div>
-                <div class="col col-8">
-                  <div class="content-wrapper">
-                    <div [innerHTML]="contentHtml"></div>
-                  </div>
-                </div>
-                <div class="col col-2"></div>
-              </div> -->
             </div>
           </div>
         </div>
@@ -209,3 +182,4 @@
     </c-card-body>
   </p-dialog>
 </div>
+

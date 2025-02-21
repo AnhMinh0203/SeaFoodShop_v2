@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
+import { Component, AfterViewInit, ChangeDetectorRef, ViewEncapsulation, ViewChild } from '@angular/core';
 import { ButtonModule, CardModule, FormModule } from '@coreui/angular';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { Router } from '@angular/router';
@@ -18,7 +18,7 @@ import { DialogModule } from 'primeng/dialog';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import Quill from 'quill';
 
-import { FileUploadModule } from 'primeng/fileupload';
+import { FileUpload, FileUploadModule } from 'primeng/fileupload';
 
 import { ImageModule } from 'primeng/image';
 import { FormsModule } from '@angular/forms';
@@ -32,6 +32,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
+import { ProductService } from '../service/product.service';
 interface Product {
   id: string;
   code: string;
@@ -76,7 +77,7 @@ interface PageEvent {
     HttpClientModule,
     ConfirmDialog,
     ToastModule,
-    ButtonModule
+
 
   ],
   providers: [ConfirmationService, MessageService],
@@ -87,7 +88,7 @@ interface PageEvent {
 
 
 export class ProductManagementComponent {
-
+  @ViewChild('fileUploader') fileUploader!: FileUpload;
   first: number = 0;
   rows: number = 10;
   isAddProductPage: boolean = false;
@@ -101,7 +102,10 @@ export class ProductManagementComponent {
   quill: any;
   delta: any;
   contentHtml: SafeHtml = '';
-  editorInstance:any;
+  editorInstance: any;
+
+  products!: Product[];
+  productSelect: any;
 
   constructor(
     private router: Router,
@@ -109,7 +113,8 @@ export class ProductManagementComponent {
     private sanitizer: DomSanitizer,
     private cdRef: ChangeDetectorRef,
     private confirmationService: ConfirmationService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private _productService: ProductService
   ) {
     this.router.events.subscribe(() => {
       this.isAddProductPage = this.router.url.includes('/product-management/add-product');
@@ -131,6 +136,11 @@ export class ProductManagementComponent {
     [{ 'align': [] }],
     ['clean']  // remove formatting button
   ];
+
+  ngOnInit() {
+    this.loadProducts();
+    this.loadExistingImages();
+  }
 
   ngAfterViewChecked() {
     if (this.visible) {
@@ -160,7 +170,8 @@ export class ProductManagementComponent {
 
 
 
-  showDialog() {
+  showDialog(product: any) {
+    this.productSelect = { ...product };
     this.visible = true;
   }
   navigateToAddProduct() {
@@ -170,23 +181,8 @@ export class ProductManagementComponent {
     this.first = event.first ?? 0;  // Đảm bảo giá trị không bị undefined
     this.rows = event.rows ?? 10;   // Đảm bảo giá trị không bị undefined
   }
-  product: Product = {
-    id: '1000',
-    code: 'f230fh0g3',
-    name: 'Bamboo Watch',
-    description: 'Product Description',
-    image: 'bamboo-watch.jpg',
-    price: 65,
-    category: 'Accessories',
-    quantity: 24,
-    inventoryStatus: 'INSTOCK',
-    rating: 5
-  };
-  products!: Product[];
 
-  ngOnInit() {
-    this.products = [this.product]; // Thêm sản phẩm vào danh sách để hiển thị
-  }
+
 
   getSeverity(status: string): "success" | "danger" | "warn" | undefined {
     switch (status) {
@@ -238,4 +234,40 @@ export class ProductManagementComponent {
     });
   }
 
+
+  loadProducts() {
+    this.productSelect = {
+      name: '',
+      price: 0,
+      origin: '',
+      quantity: 0,
+      guide: '',
+      unit: '',
+    };
+    this._productService.getProducts().subscribe((data: any) => {
+      if (data) {
+        this.products = data;
+      }
+    });
+  }
+
+  loadExistingImages() {
+    if (this.fileUploader && this.productSelect.childrenImg.length > 0) {
+      this.productSelect.childrenImg.forEach((url: any) => {
+        fetch(url)
+          .then(res => res.blob())
+          .then(blob => {
+            const file = new File([blob], url.split('/').pop() || 'image.jpg', { type: blob.type });
+            this.fileUploader.files.push(file);
+          });
+      });
+    }
+  }
+
+  removeImage(index: number) {
+    this.productSelect.childrenImg.splice(index, 1);
+}
+  onFileSelect(event: any) {
+
+  }
 }
